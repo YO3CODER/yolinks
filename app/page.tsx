@@ -1,65 +1,341 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import Wrapper from "./components/Wrapper";
+import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { addSocialLink, getSocialLinks, getUserInfo, removeSocialLink, updateUserTheme } from "./server";
+import { Copy, Palette, Plus } from "lucide-react";
+import socialLinksData from "./socialLinksData";
+import { SocialLink } from "@prisma/client";
+import EmptyState from "./components/EmptyState";
+import LinkComponent from "./components/LinkComponent";
+import error from "next/error";
+import Visualisation from "./components/Visualisation";
+
+const truncateLink = (url: string, maxLenght = 20) => {
+  return url.length > maxLenght
+    ? url.substring(0, maxLenght) + "..."
+    : url;
+};
+
+const isValidURL = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 export default function Home() {
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress as string;
+
+  const [pseudo, setPseudo] = useState<string | null | undefined>(null);
+  const [theme, setTheme] = useState<string | null | undefined>(null);
+  const [theme2, setTheme2] = useState<string | null | undefined>(null);
+  const [link, setLink] = useState<string>("");
+  const [socialPseudo, setSocialPseudo] = useState<string>("");
+  const [title, setTitle] = useState<string>(socialLinksData[0].name);
+  const [links, setLinks] = useState<SocialLink[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const themes = [
+    "light",
+    "dark",
+    "cupcake",
+    "bumblebee",
+    "emerald",
+    "corporate",
+    "synthwave",
+    "retro",
+    "cyberpunk",
+    "valentine",
+    "halloween",
+    "garden",
+    "forest",
+    "aqua",
+    "lofi",
+    "pastel",
+    "fantasy",
+    "wireframe",
+    "black",
+    "luxury",
+    "dracula",
+    "cmyk",
+    "autumn",
+    "business",
+    "acid",
+    "lemonade",
+    "night",
+    "coffee",
+    "winter",
+    "dim",
+    "nord",
+    "sunset",
+    "caramellatte",
+    "abyss",
+    "silk"
+  ];
+
+  const handleAddLink = async () => {
+    if (!isValidURL(link)) {
+      toast.error("Veuillez entrer une url valide ");
+      return;
+    }
+
+    if (!socialPseudo) {
+      toast.error("Veuillez entrer un pseudo");
+      return;
+    }
+
+    const selectedTitle = socialLinksData.find(l => l.name === title);
+    if (selectedTitle?.root && selectedTitle.altRoot) {
+      if (
+        !link.startsWith(selectedTitle.root) &&
+        !link.startsWith(selectedTitle.altRoot)
+      ) {
+        toast.error(
+          `L'URL doit commencer par ${selectedTitle.root} ou par ${selectedTitle.altRoot}`
+        );
+        return;
+      }
+    }
+
+    try {
+      const newLink = await addSocialLink(email, title, link, socialPseudo);
+      const modal = document.getElementById("social_link_form") as HTMLDialogElement;
+      if (modal) modal.close();
+
+      if (newLink) {
+        setLinks([...links, newLink]);
+      }
+
+      setLink("");
+      setSocialPseudo("");
+      setTitle(socialLinksData[0].name);
+      toast.success("Lien ajaouter avec succès 🥳 ");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRemoveLink = async (linkId: string) => {
+    try {
+      await removeSocialLink(email, linkId);
+      setLinks(links.filter(link => link.id !== linkId));
+      toast.success("Lien supprimé");
+    } catch {
+      console.error(error);
+    }
+  };
+
+  async function fetchLinks() {
+    try {
+      const userInfo = await getUserInfo(email);
+      if (userInfo) {
+        setPseudo(userInfo.pseudo);
+        setTheme(userInfo.theme);
+        setTheme2(userInfo.theme)
+      }
+
+      const fetcheLinks = await getSocialLinks(email);
+      if (fetcheLinks) {
+        setLinks(fetcheLinks);
+      }
+      setLoading(false);
+    } catch (error) {
+      toast.error("Impossible de récupérer les données");
+    }
+  }
+
+  useEffect(() => {
+    if (email) {
+      fetchLinks();
+    }
+  }, [email]);
+
+  const copyToClipboard = () => {
+    if (!pseudo) return;
+
+    const url = `http://192.168.1.69:3000/page/${pseudo}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => toast.success("Lien copié"))
+      .catch(err => console.error("Erreur lors de la copie :", err));
+  };
+
+  const handleConfirmTheme = async () =>{
+    try {
+
+      if(theme){
+         await updateUserTheme(email , theme)
+        toast.success("Thème apliqué")
+        setTheme2(theme)
+      }
+    
+    }catch (error){
+      console.error(error)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <Wrapper>
+      <Toaster position="top-right" reverseOrder={false} />
+
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-2/3">
+          <div className="flex justify-between items-center bg-base-200 p-5 rounded-3xl">
+            <div>
+              <span>🔥 Ta page est prête 😎 </span>
+
+              {pseudo && (
+  <Link
+    className="link hidden md:flex font-bold"
+    href={`http://192.168.1.69:3000/page/${pseudo}`}
+  >
+    http://192.168.1.69:3000/page/{pseudo}
+  </Link>
+)}
+
+
+              {pseudo && (
+                <Link
+                  className="link md:hidden flex font-bold"
+                  href={`http://192.168.1.69:3000/page/${pseudo}`}
+                >
+                  {truncateLink(`http://192.168.1.69:3000/page/${pseudo}`)}
+                </Link>
+              )}
+            </div>
+
+            <button
+              className="btn btn-sm-ghost"
+              onClick={copyToClipboard}
+              disabled={!pseudo}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
+
+          <button
+            className="btn btn-sm w-full my-4"
+            onClick={() =>
+              (document.getElementById("social_links_form") as HTMLDialogElement).showModal()
+            }
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <Plus className="w-4 h-4" />
+          </button>
+
+          <dialog id="social_links_form" className="modal">
+            <div className="modal-box">
+              <form method="dialog">
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
+              </form>
+
+              <h3 className="font-bold text-lg">Nouveau lien </h3>
+              <p className="py-4">Ajouter vos liens publics </p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  className="select select-bordered"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                >
+                  {socialLinksData.map(({ name }) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Entrez le pseudo social"
+                  className="input input-bordered w-full"
+                  value={socialPseudo}
+                  onChange={e => setSocialPseudo(e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Entrez l'URL"
+                  className="input input-bordered w-full"
+                  value={link}
+                  onChange={e => setLink(e.target.value)}
+                />
+
+                <button className="btn btn-accent" onClick={handleAddLink}>
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </dialog>
+
+          {loading ? (
+            <div className="my-30 flex justify-center items-center w-full">
+              <span className="loading loading-spinner loading-lg text-accent"></span>
+            </div>
+          ) : links.length === 0 ? (
+            <div className="flex justify-normal items-center w-full">
+              <EmptyState IconComponent={"Cable"} message={"Aucun lien disponible !😭"} />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {links.map(link => (
+                <LinkComponent
+                  key={link.id}
+                  socialLink={link}
+                  onRemove={handleRemoveLink}
+                  readonly={false}
+                  fetchLinks={fetchLinks}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+
+        <div className="md:w-1/3 ml-4">
+          {pseudo && theme && (
+            <div>
+              <div className="flex items-center mb-4">
+  <select
+    className="select select-bordered w-full"
+    value={theme}
+    onChange={e => setTheme(e.target.value)}
+  >
+    {themes.map(themeOption => (
+      <option key={themeOption} value={themeOption}>
+        {themeOption}
+      </option>
+    ))}
+  </select>
+
+  <button
+    className={`ml-4 btn ${theme === theme2 ? 'btn-disabled' : 'btn-accent'} flex items-center justify-center`}
+    
+    disabled={theme === theme2}
+    title={theme === theme2 ? "Thème déjà appliqué" : "Appliquer le thème"}
+    onClick={handleConfirmTheme}
+  >
+    <Palette className="w-4 h-4" />
+  </button>
+</div>
+
+
+              <Visualisation
+                socialLinks={links}
+                pseudo={pseudo}
+                theme={theme}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </Wrapper>
   );
 }
