@@ -160,7 +160,7 @@ export default function Home() {
   const copyToClipboard = () => {
     if (!pseudo) return;
 
-    const url = `http://192.168.1.69:3000/page/${pseudo}`;
+    const url = `https://yolinkifyapp.vercel.app/page/${pseudo}`;
     navigator.clipboard
       .writeText(url)
       .then(() => toast.success("Lien copié"))
@@ -194,9 +194,9 @@ export default function Home() {
               {pseudo && (
   <Link
     className="link hidden md:flex font-bold"
-    href={`http://192.168.1.69:3000/page/${pseudo}`}
+    href={`https://yolinkifyapp.vercel.apphttps://yolinkifyapp.vercel.app/page/${pseudo}`}
   >
-    http://192.168.1.69:3000/page/{pseudo}
+    📄Page de : {pseudo}
   </Link>
 )}
 
@@ -204,9 +204,9 @@ export default function Home() {
               {pseudo && (
                 <Link
                   className="link md:hidden flex font-bold"
-                  href={`http://192.168.1.69:3000/page/${pseudo}`}
+                  href={`https://yolinkifyapp.vercel.app/page/${pseudo}`}
                 >
-                  {truncateLink(`http://192.168.1.69:3000/page/${pseudo}`)}
+                  {truncateLink(`https://yolinkifyapp.vercel.app/page/${pseudo}`)}
                 </Link>
               )}
             </div>
