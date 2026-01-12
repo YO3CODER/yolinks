@@ -159,7 +159,7 @@ export default function Home() {
   const copyToClipboard = () => {
     if (!pseudo) return;
 
-    const url = `yolinkify.versel.app/page/${pseudo}`;
+    const url = `yolinkify.vercel.app/page/${pseudo}`;
     navigator.clipboard
       .writeText(url)
       .then(() => toast.success("Lien copié"))
