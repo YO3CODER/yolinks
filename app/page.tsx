@@ -52,7 +52,7 @@ export default function Home() {
     "synthwave",
     "retro",
     "cyberpunk",
-    "valentine",
+    "caramellatte",
     "halloween",
     "garden",
     "forest",
@@ -69,13 +69,12 @@ export default function Home() {
     "business",
     "acid",
     "lemonade",
-    "night",
     "coffee",
     "winter",
     "dim",
     "nord",
     "sunset",
-    "caramellatte",
+   "valentine",
     "abyss",
     "silk"
   ];
@@ -106,7 +105,7 @@ export default function Home() {
 
     try {
       const newLink = await addSocialLink(email, title, link, socialPseudo);
-      const modal = document.getElementById("social_link_form") as HTMLDialogElement;
+      const modal = document.getElementById("social_links_form") as HTMLDialogElement;
       if (modal) modal.close();
 
       if (newLink) {
@@ -160,7 +159,7 @@ export default function Home() {
   const copyToClipboard = () => {
     if (!pseudo) return;
 
-    const url = `https://yolinkifyapp.vercel.app/page/${pseudo}`;
+    const url = `/page/${pseudo}`;
     navigator.clipboard
       .writeText(url)
       .then(() => toast.success("Lien copié"))
@@ -192,21 +191,24 @@ export default function Home() {
               <span>🔥 Ta page est prête 😎 </span>
 
               {pseudo && (
-  <Link
-    className="link hidden md:flex font-bold"
-    href={`https://yolinkifyapp.vercel.apphttps://yolinkifyapp.vercel.app/page/${pseudo}`}
-  >
-    📄Page de : {pseudo}
-  </Link>
-)}
-
+                <Link
+                  href={`/page/${pseudo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link hidden md:flex font-bold"
+                >
+                  📄Page de : {pseudo}
+                </Link>
+              )}
 
               {pseudo && (
                 <Link
+                  href={`/page/${pseudo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="link md:hidden flex font-bold"
-                  href={`https://yolinkifyapp.vercel.app/page/${pseudo}`}
                 >
-                  {truncateLink(`https://yolinkifyapp.vercel.app/page/${pseudo}`)}
+                  {truncateLink(`/page/${pseudo}`)}
                 </Link>
               )}
             </div>

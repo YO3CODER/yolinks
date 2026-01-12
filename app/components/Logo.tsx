@@ -5,7 +5,7 @@ const Logo = () => {
   return (
     <div
       className="flex items-center  bg-transparent"
-      data-theme="night">
+      data-theme="cmy">
         <div className=""> 
       <Cable className="w-6 h-6 text-primary mr-2" />
       </div> 

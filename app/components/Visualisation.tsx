@@ -22,7 +22,7 @@ const Visualisation: React.FC<VisualisationProps> = ({
     theme,
 }) => {
     const activeLinks = socialLinks.filter(link => link.active)
-    const url = `https://yolinkifyapp.vercel.app/page/${pseudo}`
+    const url = `/page/${pseudo}`
 
     return (
         <div className="mockup-browser bg-base-200 hidden md:block">
