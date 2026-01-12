@@ -7,7 +7,6 @@ import Logo from '@/app/components/Logo'
 import { getSocialLinks, getUserInfo } from '@/app/server'
 import { SocialLink } from '@prisma/client'
 import { LogIn, UserPlus } from 'lucide-react'
-import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
@@ -77,15 +76,15 @@ const Page = ({ params }: { params: Promise<{ pseudo: string }> }) => {
             <Avatar pseudo={pseudo} />
 
             <div className="flex space-x-4 justify-center">
-              <Link href="/sign-up" className="btn btn-sm">
+              <a href="/sign-up" className="btn btn-sm">
                 <UserPlus className="w-4 h-4" />
                 <span>Créer votre page</span>
-              </Link>
+              </a>
 
-              <Link href="/sign-in" className="btn btn-sm">
+              <a href="/sign-in" className="btn btn-sm">
                 <LogIn className="w-4 h-4" />
                 <span>Gérer vos liens</span>
-              </Link>
+              </a>
             </div>
 
             <div className="w-full max-w-sm mx-auto">
