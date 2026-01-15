@@ -403,6 +403,32 @@ const LinkComponent: FC<LinkComponentProps> = ({
     }
   }
 
+
+
+  // Convertit les URLs dans le texte en liens cliquables
+const linkify = (text: string) => {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  return text.split(urlRegex).map((part, index) =>
+    urlRegex.test(part) ? (
+      <a
+        key={index}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline hover:text-blue-800 break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  );
+}
+
+
   return (
     <div className="group relative">
       {readonly ? (
@@ -886,11 +912,15 @@ const LinkComponent: FC<LinkComponentProps> = ({
                 )}
 
                 {/* Affichage de la description */}
-                {socialLink.description && (
-                  <p className="text-sm text-gray-600 mt-2 px-2 whitespace-pre-line">
-                    {socialLink.description}
-                  </p>
-                )}
+      
+              {/* Affichage de la description avec liens cliquables */}
+{formData.description && (
+  <p className="text-sm text-gray-600 mt-2 px-2 whitespace-pre-wrap break-words">
+    {linkify(formData.description)}
+  </p>
+)}
+
+
 
                 <div className="tooltip" data-tip={formData.url}>
                   <Link

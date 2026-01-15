@@ -275,8 +275,9 @@ const Page = ({ params }: { params: Promise<{ pseudo: string }> }) => {
             {/* Statistiques */}
             {!loading && links.length > 0 && (
               <div className="text-center mt-8 pt-4 border-t border-base-300">
-                <p className="text-sm text-gray-500">
-                  📊 {links.length} lien{links.length > 1 ? 's' : ''} • 
+             
+                 <b>Caractéristiques : </b> <p className="text-sm text-shadow-violet-300 bg-white b-5">
+                   {links.length} lien{links.length > 1 ? 's' : ''} • 
                   {" "}{links.filter(l => l.active).length} actif{links.filter(l => l.active).length > 1 ? 's' : ''} • 
                   {" "}{links.reduce((sum, link) => sum + link.clicks, 0)} clics au total
                 </p>
